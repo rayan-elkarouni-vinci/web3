@@ -1,58 +1,30 @@
-import fs from "fs";
+import { db } from '../src/prisma/db.ts';
 import type { Expense, NewExpense } from "../types/expense.ts";
 
 export class ExpensesService {
-
-  private static dataPath = "./data/expenses.json";
-  private static resetPath = "./data/expenses.init.json";
   
-  public static getExpenses(): Expense[] {
-    return this.readExpenses();
-  }
-  
-  public static addExpense(newExpense: NewExpense): Expense[] {
-    const expenses = this.readExpenses();
-    const expense: Expense = {
-      ...newExpense,
-      id: (expenses.length + 1).toString()
-    };
-    expenses.push(expense);
-    this.saveExpenses(expenses);
-    return expenses;
-  }
-  
-  public static resetExpenses(): Expense[] {
-    this._resetExpenses();
-    return this.readExpenses();
-  }
-  
-  private static readExpenses(): Expense[] {
+  public static async getExpenses() {
     try {
-      const data = JSON.parse(fs.readFileSync(this.dataPath, "utf-8"));
-      return data;
+      return await db.orm.public.Expense.all();
     } catch (error) {
-      console.error("Error reading expenses file:", error);
+      console.error("Erreur lors de la lecture des dépenses :", error);
       throw error;
     }
   }
   
-  private static saveExpenses(expenses: Expense[]): void {
+  public static async addExpense(newExpense: NewExpense) {
     try {
-      fs.writeFileSync(this.dataPath, JSON.stringify(expenses, null, 2));
+      const createdExpense = await db.orm.public.Expense.create(newExpense);
+      return createdExpense; 
     } catch (error) {
-      console.error("Error saving expenses file:", error);
-      throw error;
-    }
-  }
-
-  private static _resetExpenses(): void {
-    try {
-      const defaultExpenses: Expense[] = JSON.parse(fs.readFileSync(this.resetPath, "utf-8"));
-      fs.writeFileSync(this.dataPath, JSON.stringify(defaultExpenses, null, 2));
-    } catch (error) {
-      console.error("Error resetting expenses file:", error);
+      console.error("Erreur lors de l'ajout de la dépense :", error);
       throw error;
     }
   }
   
+  /*
+  public static async resetExpenses() {
+    // Non implémenté pour la base de données
+  }
+  */
 }
