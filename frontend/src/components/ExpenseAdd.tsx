@@ -1,35 +1,31 @@
-import { useState } from "react";
 import type { NewExpense } from "../types/Expense";
+import { useForm } from "react-hook-form";
 
 interface ExpenseAddProps {
   addExpense: (expense: NewExpense) => void;
 }
 
 function ExpenseAdd({ addExpense }: ExpenseAddProps) {
-  const [payer, setPayer] = useState<string>("Alice");
-  const [date, setDate] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [amount, setAmount] = useState<number>(0);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<NewExpense>();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newExpense: NewExpense = {
-      date,
-      description,
-      payer,
-      amount,
-    } 
-    addExpense(newExpense);
+  const onSubmit = (data: NewExpense) => {
+    addExpense(data);
+    reset(); // Reset the form after submission
   };
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <h2>Add a new Expense</h2>
 
         <label>
           Payer:
-          <select value={payer} onChange={(e) => setPayer(e.target.value)}>
+          <select {...register("payer")}>
             <option value="Alice">Alice</option>
             <option value="Bob">Bob</option>
           </select>
@@ -39,17 +35,20 @@ function ExpenseAdd({ addExpense }: ExpenseAddProps) {
           Date:
           <input
             type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
+            {...register("date", { required: "Date required" })}
+            placeholder="Select date"
           />
+          {errors.date && <span>{errors.date.message}</span>}
         </label>
 
         <label>
           Description:
           <input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            type="text"
+            {...register("description", { required: "Description required" })}
+            placeholder="Enter description"
           />
+          {errors.description && <span>{errors.description.message}</span>}
         </label>
 
         <label>
@@ -57,9 +56,14 @@ function ExpenseAdd({ addExpense }: ExpenseAddProps) {
           <input
             type="number"
             step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(Number(e.target.value))}
+            {...register("amount", {
+              required: "Amount required",
+              valueAsNumber: true,
+              min: { value: 0.01, message: "Must be positive" },
+            })}
+            placeholder="Enter amount"
           />
+          {errors.amount && <span>{errors.amount.message}</span>}
         </label>
 
         <button type="submit">Add</button>
