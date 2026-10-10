@@ -11,7 +11,7 @@ interface ExpenseItemProps {
 function ExpenseItem({ expense }: ExpenseItemProps) {
   return <div>
     <h3>Expense {expense.id}</h3>
-    <p>Date: {expense.date}</p>
+    <p>Date: {new Date(expense.date).toLocaleDateString("fr-FR", { timeZone: "UTC" })}</p>
     <p>Description: {expense.description}</p>
     {/* amount must be restricted to 2 decimal places */}
     <p>Amount: {expense.amount.toFixed(2)}</p>
