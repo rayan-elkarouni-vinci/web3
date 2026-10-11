@@ -2,11 +2,10 @@ import type { NewExpense } from "../types/Expense";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import useUsers from "../hooks/useUsers";
 
 const ExpenseSchema = z.object({
-  payer: z.enum(["Alice", "Bob"], {
-    message: "Payer must be either Alice or Bob",
-  }),
+  payerId: z.number({ message: "Payer required" }),
   date: z.string().min(1, { message: "Date required" }),
   description: z
     .string()
@@ -15,6 +14,8 @@ const ExpenseSchema = z.object({
   amount: z
     .number({ message: "Amount required" })
     .positive({ message: "Amount must be positive" }),
+  // Les cases à cocher renvoient du texte : on convertit à l'envoi
+  participants: z.array(z.string()).min(1, "Select at least one participant"),
 });
 
 // Le type du formulaire est déduit du schéma : pas besoin de le réécrire
@@ -25,6 +26,8 @@ interface ExpenseAddProps {
 }
 
 function ExpenseAdd({ addExpense }: ExpenseAddProps) {
+  const { users, loading, error } = useUsers();
+  
   const {
     register,
     handleSubmit,
@@ -32,13 +35,22 @@ function ExpenseAdd({ addExpense }: ExpenseAddProps) {
     formState: { errors },
   } = useForm<ExpenseForm>({
     resolver: zodResolver(ExpenseSchema),
-    defaultValues: { payer: "Alice" },
+    defaultValues: { participants: [] },
   });
 
   const onSubmit = (data: ExpenseForm) => {
-    addExpense({ ...data, description: data.description ?? "" }); // cas ou pas de description, on en met une vide
-    reset(); // Reset the form after submission
+    addExpense({
+      date: data.date,
+      description: data.description ?? "",
+      amount: data.amount,
+      payerId: data.payerId,
+      participants: data.participants.map(Number),
+    });
+    reset();
   };
+
+  if (loading) return <p>Loading users...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div>
@@ -47,12 +59,31 @@ function ExpenseAdd({ addExpense }: ExpenseAddProps) {
 
         <label>
           Payer:
-          <select {...register("payer")}>
-            <option value="Alice">Alice</option>
-            <option value="Bob">Bob</option>
+          <select {...register("payerId", { valueAsNumber: true })}>
+            <option value="">Choose a payer</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
+            ))}
           </select>
-          {errors.payer && <span>{errors.payer.message}</span>}
+          {errors.payerId && <span>{errors.payerId.message}</span>}
         </label>
+
+        <fieldset>
+          <legend>Participants:</legend>
+          {users.map((user) => (
+            <label key={user.id}>
+              <input
+                type="checkbox"
+                value={user.id}
+                {...register("participants")}
+              />
+              {user.name}
+            </label>
+          ))}
+          {errors.participants && <span>{errors.participants.message}</span>}
+        </fieldset>
 
         <label>
           Date:

@@ -8,7 +8,8 @@ export function isValidNewExpense(data: any): data is NewExpense {
   return (
     typeof candidate.date === 'string' &&
     typeof candidate.description === 'string' &&
-    typeof candidate.payer === 'string' &&
-    typeof candidate.amount === 'number'
+    typeof candidate.payerId === 'number' &&
+    typeof candidate.amount === 'number' &&
+    Array.isArray(candidate.participants)
   );
 }

@@ -7,7 +7,7 @@ model Expense {
   date         DateTime @default(now())
   payer        User     @relation("PayerExpenses", fields: [payerId], references: [id])
   payerId      Int
-  participants User[]
+  participants ExpenseUser[]
 }
 
 model User {
@@ -18,7 +18,7 @@ model User {
 
   transfersOut         Transfer[]    @relation("UserTransfersSource")
   transfersIn          Transfer[]    @relation("UserTransfersTarget")
-  participatedExpenses Expense[] @relation("ParticipantExpenses")
+  participatedExpenses ExpenseUser[]
   paidExpenses Expense[]  @relation("PayerExpenses")
 }
 

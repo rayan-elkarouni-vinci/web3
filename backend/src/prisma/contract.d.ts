@@ -367,7 +367,7 @@ export namespace Models {
     description: CodecTypes['pg/text@1']['output'];
     id: CodecTypes['pg/int4@1']['output'];
     payerId: CodecTypes['pg/int4@1']['output'];
-    participants: public_User[];
+    participants: public_ExpenseUser[];
     payer: public_User;
     readonly [RelationKeys]?: 'participants' | 'payer';
   };
@@ -394,7 +394,7 @@ export namespace Models {
     id: CodecTypes['pg/int4@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
     paidExpenses: public_Expense[];
-    participatedExpenses: public_Expense[];
+    participatedExpenses: public_ExpenseUser[];
     transfersIn: public_Transfer[];
     transfersOut: public_Transfer[];
     readonly [RelationKeys]?:
@@ -702,18 +702,14 @@ type ContractBase = Omit<
             };
             readonly relations: {
               readonly participants: {
-                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
-                readonly cardinality: 'N:M';
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ExpenseUser';
+                };
+                readonly cardinality: '1:N';
                 readonly on: {
                   readonly localFields: readonly ['id'];
                   readonly targetFields: readonly ['expenseId'];
-                };
-                readonly through: {
-                  readonly table: 'ExpenseUser';
-                  readonly namespaceId: 'public';
-                  readonly parentColumns: readonly ['expenseId'];
-                  readonly childColumns: readonly ['userId'];
-                  readonly targetColumns: readonly ['id'];
                 };
               };
               readonly payer: {
@@ -873,19 +869,12 @@ type ContractBase = Omit<
               readonly participatedExpenses: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Expense';
+                  readonly model: 'ExpenseUser';
                 };
-                readonly cardinality: 'N:M';
+                readonly cardinality: '1:N';
                 readonly on: {
                   readonly localFields: readonly ['id'];
                   readonly targetFields: readonly ['userId'];
-                };
-                readonly through: {
-                  readonly table: 'ExpenseUser';
-                  readonly namespaceId: 'public';
-                  readonly parentColumns: readonly ['userId'];
-                  readonly childColumns: readonly ['expenseId'];
-                  readonly targetColumns: readonly ['id'];
                 };
               };
               readonly transfersIn: {

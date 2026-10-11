@@ -65,7 +65,7 @@
             },
             "relations": {
               "participants": {
-                "cardinality": "N:M",
+                "cardinality": "1:N",
                 "on": {
                   "localFields": [
                     "id"
@@ -74,21 +74,8 @@
                     "expenseId"
                   ]
                 },
-                "through": {
-                  "childColumns": [
-                    "userId"
-                  ],
-                  "namespaceId": "public",
-                  "parentColumns": [
-                    "expenseId"
-                  ],
-                  "table": "ExpenseUser",
-                  "targetColumns": [
-                    "id"
-                  ]
-                },
                 "to": {
-                  "model": "User",
+                  "model": "ExpenseUser",
                   "namespace": "public"
                 }
               },
@@ -337,7 +324,7 @@
                 }
               },
               "participatedExpenses": {
-                "cardinality": "N:M",
+                "cardinality": "1:N",
                 "on": {
                   "localFields": [
                     "id"
@@ -346,21 +333,8 @@
                     "userId"
                   ]
                 },
-                "through": {
-                  "childColumns": [
-                    "expenseId"
-                  ],
-                  "namespaceId": "public",
-                  "parentColumns": [
-                    "userId"
-                  ],
-                  "table": "ExpenseUser",
-                  "targetColumns": [
-                    "id"
-                  ]
-                },
                 "to": {
-                  "model": "Expense",
+                  "model": "ExpenseUser",
                   "namespace": "public"
                 }
               },

@@ -1,9 +1,19 @@
+import type { User } from "./User";
+
 export interface Expense {
-  id: string;
+  id: number;
   date: string;
   description: string;
-  payer: string;
   amount: number;
+  payerId: number;
+  payer: User;
+  participants: User[];
 }
 
-export type NewExpense = Omit<Expense, "id">;
+export interface NewExpense {
+  date: string;
+  description: string;
+  amount: number;
+  payerId: number;
+  participants: number[];
+}
