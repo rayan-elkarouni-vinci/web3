@@ -4,16 +4,24 @@
 ### Get all expenses
 GET {{expenses}}
 
-### Add a new expense
-POST {{expenses}}
-Content-Type: application/json
+            ### --- Amount query parameter --
 
-{
-  "date": "2025-10-15",
-  "description": "Team lunch",
-  "payer": "John",
-  "amount": 45.50
-}
+### Amount over 79
+GET {{expenses}}?amount=79
 
-### Reset expenses
-POST {{expenses}}/reset
+### Invalid amount (htttp 400)
+GET {{expenses}}?amount=abc
+
+            ### --- PayerId query parameter ---
+
+### Dépenses payées par Jane (id 2)
+GET {{expenses}}?payerId=2
+
+### Jane ET montant supérieur à 50
+GET {{expenses}}?payerId=2&amount=50
+
+### Montant supérieur à 40 ET payeur 3
+GET {{expenses}}?amount=40&payerId=3
+
+### Payeur invalide (doit répondre 400)
+GET {{expenses}}?payerId=abc

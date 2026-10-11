@@ -17,3 +17,8 @@ export interface NewExpense {
   payerId: number;
   participants: number[];
 }
+
+export interface ExpenseFilter {
+  amount?: number;
+  payerId?: number;
+}

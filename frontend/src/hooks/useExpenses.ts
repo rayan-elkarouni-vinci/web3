@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Expense, NewExpense } from '../types/Expense';
+import type { Expense, ExpenseFilter, NewExpense } from '../types/Expense';
 
 const host = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const API_BASE_URL = `${host}/api`;
@@ -16,7 +16,9 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error';
 }
 
-function useExpenses(): UseExpensesResult {
+function useExpenses(filter: ExpenseFilter = {}): UseExpensesResult {
+  const { amount, payerId } = filter;
+  
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +27,19 @@ function useExpenses(): UseExpensesResult {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_BASE_URL}/expenses`);
+
+      const params = new URLSearchParams();
+      if (amount !== undefined) {
+        params.set('amount', String(amount));
+      }
+      if (payerId !== undefined) params.set('payerId', String(payerId));
+
+      const query = params.toString();
+      const url = query
+        ? `${API_BASE_URL}/expenses?${query}`
+        : `${API_BASE_URL}/expenses`;
+    
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch expenses (${response.status})`);
       }
@@ -36,7 +50,7 @@ function useExpenses(): UseExpensesResult {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [amount, payerId]);
 
   // Runs once on mount to load the initial expense list.
   useEffect(() => {

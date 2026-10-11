@@ -1,4 +1,5 @@
-import { User } from "./user";
+import { z } from "zod";
+import type { User } from "./user.ts";
 
 export interface Expense {
   id: number;
@@ -16,4 +17,16 @@ export interface NewExpense {
   amount: number;
   payerId: number;
   participants: number[];
+}
+
+const expenseFilterSchema = z.object({
+  amount: z.coerce.number().nonnegative().optional(),
+  payerId: z.coerce.number().int().positive().optional(),
+});
+
+export type ExpenseFilter = z.infer<typeof expenseFilterSchema>;
+
+export function parseExpenseFilter(data: unknown): ExpenseFilter | false {
+  const result = expenseFilterSchema.safeParse(data);
+  return result.success ? result.data : false;
 }

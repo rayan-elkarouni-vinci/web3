@@ -1,13 +1,24 @@
-import type { Expense, NewExpense } from "../types/expense.ts";
+import type { Expense, ExpenseFilter, NewExpense } from "../types/expense.ts";
 import { db } from "../prisma/db.ts";
 import { Temporal } from "temporal-polyfill";
 
 export class ExpensesService {
-  public static async getExpenses(): Promise<Expense[]> {
+  public static async getExpenses(
+    filter: ExpenseFilter = {},
+  ): Promise<Expense[]> {
     try {
-      const rows = await db.orm.public.Expense.include("participants", (p) =>
-        p.include("user"),
-      )
+      const { amount, payerId } = filter;
+
+      const base = db.orm.public.Expense;
+
+      const byAmount =
+        amount !== undefined ? base.where((e) => e.amount.gt(amount)) : base;
+
+      const filtered =
+        payerId !== undefined ? byAmount.where({ payerId }) : byAmount;
+
+      const rows = await filtered
+        .include("participants", (p) => p.include("user"))
         .include("payer")
         .all();
 
@@ -37,10 +48,9 @@ export class ExpensesService {
           mutator.create(newExpense.participants.map((userId) => ({ userId }))),
       });
 
-      const expense = await db.orm.public.Expense
-        .where({ id: created.id })
-        .include('participants', (p) => p.include('user'))
-        .include('payer')
+      const expense = await db.orm.public.Expense.where({ id: created.id })
+        .include("participants", (p) => p.include("user"))
+        .include("payer")
         .first();
 
       if (!expense) {

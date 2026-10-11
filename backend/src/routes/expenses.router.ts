@@ -1,6 +1,6 @@
 
 import express from "express";
-import type { NewExpense } from "../types/expense.ts";
+import { parseExpenseFilter, type NewExpense } from "../types/expense.ts";
 import { ExpensesService } from "../services/expenses.service.ts";
 import { isValidNewExpense } from "../guards/expenses.guard.ts";
 
@@ -8,7 +8,11 @@ const expensesRouter = express.Router();
 
 expensesRouter.get("/", async (req, res) => {
   try {
-    const expenses = await ExpensesService.getExpenses();
+    const filter = parseExpenseFilter(req.query);
+    if (!filter) {
+      return res.status(400).json({ error: "Invalid filter" });
+    }
+    const expenses = await ExpensesService.getExpenses(filter);
     res.json(expenses);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
