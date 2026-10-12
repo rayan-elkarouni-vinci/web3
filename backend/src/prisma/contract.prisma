@@ -1,13 +1,15 @@
 // use prisma-8
 
 model Expense {
-  id           Int      @id @default(autoincrement())
+  id           Int            @id @default(autoincrement())
   description  String
   amount       Float
-  date         DateTime @default(now())
-  payer        User     @relation("PayerExpenses", fields: [payerId], references: [id])
+  date         DateTime       @default(now())
+  payer        User           @relation("PayerExpenses", fields: [payerId], references: [id])
   payerId      Int
   participants ExpenseUser[]
+  categoryId   Int? 
+  category     Category?       @relation(fields: [categoryId], references: [id])
 }
 
 model User {
@@ -39,4 +41,11 @@ model Transfer {
   sourceId  Int
   target    User   @relation("UserTransfersTarget", fields: [targetId], references: [id])
   targetId  Int
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  colour    String
+  expenses Expense[]
 }
