@@ -1,0 +1,33 @@
+@server = http://localhost:3000
+@expenses = {{server}}/api/expenses
+
+### Toutes les catégories
+GET {{server}}/api/categories
+
+### Les dépenses (doivent contenir la catégorie)
+GET {{expenses}}
+
+### Créer une dépense avec catégorie
+POST {{expenses}}
+Content-Type: application/json
+
+{
+  "date": "2026-10-20",
+  "description": "Test category",
+  "amount": 12.5,
+  "payerId": 1,
+  "participants": [1, 2],
+  "categoryId": 1
+}
+
+### Sans catégorie (doit répondre 400)
+POST {{expenses}}
+Content-Type: application/json
+
+{
+  "date": "2026-10-20",
+  "description": "Test sans categorie",
+  "amount": 12.5,
+  "payerId": 1,
+  "participants": [1, 2]
+}

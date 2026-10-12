@@ -10,6 +10,7 @@ export function isValidNewExpense(data: any): data is NewExpense {
     typeof candidate.description === 'string' &&
     typeof candidate.payerId === 'number' &&
     typeof candidate.amount === 'number' &&
+    typeof candidate.categoryId === 'number' &&
     Array.isArray(candidate.participants)
   );
 }

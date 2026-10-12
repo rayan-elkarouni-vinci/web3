@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import useUsers from "../hooks/useUsers";
+import useCategories from "../hooks/useCategories";
 
 const ExpenseSchema = z.object({
   payerId: z.number({ message: "Payer required" }),
@@ -16,6 +17,7 @@ const ExpenseSchema = z.object({
     .positive({ message: "Amount must be positive" }),
   // Les cases à cocher renvoient du texte : on convertit à l'envoi
   participants: z.array(z.string()).min(1, "Select at least one participant"),
+  categoryId: z.number({ message: "Category required" }),
 });
 
 // Le type du formulaire est déduit du schéma : pas besoin de le réécrire
@@ -27,7 +29,12 @@ interface ExpenseAddProps {
 
 function ExpenseAdd({ addExpense }: ExpenseAddProps) {
   const { users, loading, error } = useUsers();
-  
+  const {
+    categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = useCategories();
+
   const {
     register,
     handleSubmit,
@@ -45,12 +52,13 @@ function ExpenseAdd({ addExpense }: ExpenseAddProps) {
       amount: data.amount,
       payerId: data.payerId,
       participants: data.participants.map(Number),
+      categoryId: data.categoryId,
     });
     reset();
   };
 
-  if (loading) return <p>Loading users...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading || categoriesLoading) return <p>Loading...</p>;
+  if (error || categoriesError) return <p>Error: {error ?? categoriesError}</p>;
 
   return (
     <div>
@@ -68,6 +76,19 @@ function ExpenseAdd({ addExpense }: ExpenseAddProps) {
             ))}
           </select>
           {errors.payerId && <span>{errors.payerId.message}</span>}
+        </label>
+
+        <label>
+          Category:
+          <select {...register("categoryId", { valueAsNumber: true })}>
+            <option value="">Choose a category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          {errors.categoryId && <span>{errors.categoryId.message}</span>}
         </label>
 
         <fieldset>

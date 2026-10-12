@@ -25,3 +25,14 @@ GET {{expenses}}?amount=40&payerId=3
 
 ### Payeur invalide (doit répondre 400)
 GET {{expenses}}?payerId=abc
+
+            ### --- categoryId query parameter ---
+
+### Catégorie 2
+GET {{expenses}}?categoryId=2
+
+### Catégorie 1 ET payeur 2
+GET {{expenses}}?categoryId=1&payerId=2
+
+### Catégorie invalide (400)
+GET {{expenses}}?categoryId=abc

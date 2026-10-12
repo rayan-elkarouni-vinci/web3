@@ -1,3 +1,4 @@
+import type { Category } from "./Category";
 import type { User } from "./User";
 
 export interface Expense {
@@ -8,6 +9,8 @@ export interface Expense {
   payerId: number;
   payer: User;
   participants: User[];
+  categoryId: number | null;
+  category: Category | null;
 }
 
 export interface NewExpense {
@@ -16,9 +19,11 @@ export interface NewExpense {
   amount: number;
   payerId: number;
   participants: number[];
+  categoryId: number;
 }
 
 export interface ExpenseFilter {
   amount?: number;
   payerId?: number;
+  categoryId?: number;
 }

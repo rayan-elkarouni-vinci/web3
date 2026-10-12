@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import type { ExpenseFilter } from "../types/Expense";
 import useUsers from "../hooks/useUsers";
+import useCategories from "../hooks/useCategories";
 
 interface ExpenseSearchProps {
   onSearch: (filter: ExpenseFilter) => void;
@@ -9,19 +10,22 @@ interface ExpenseSearchProps {
 interface SearchForm {
   amount: string;
   payerId: string;
+  categoryId: string;
 }
 
 function ExpenseSearch({ onSearch }: ExpenseSearchProps) {
   const { users } = useUsers();
+  const { categories } = useCategories();
 
   const { register, handleSubmit } = useForm<SearchForm>({
-    defaultValues: { amount: "", payerId: "" },
+    defaultValues: { amount: "", payerId: "", categoryId: "" },
   });
 
   const onSubmit = (data: SearchForm) => {
     onSearch({
       amount: data.amount === "" ? undefined : Number(data.amount),
       payerId: data.payerId === "" ? undefined : Number(data.payerId),
+      categoryId: data.categoryId === "" ? undefined : Number(data.categoryId),
     });
   };
 
@@ -47,6 +51,18 @@ function ExpenseSearch({ onSearch }: ExpenseSearchProps) {
           {users.map((user) => (
             <option key={user.id} value={user.id}>
               {user.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Category:
+        <select {...register("categoryId")}>
+          <option value="">All categories</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
             </option>
           ))}
         </select>

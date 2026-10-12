@@ -7,19 +7,23 @@ export class ExpensesService {
     filter: ExpenseFilter = {},
   ): Promise<Expense[]> {
     try {
-      const { amount, payerId } = filter;
+      const { amount, payerId, categoryId } = filter;
 
       const base = db.orm.public.Expense;
 
       const byAmount =
         amount !== undefined ? base.where((e) => e.amount.gt(amount)) : base;
 
-      const filtered =
+      const byPayer =
         payerId !== undefined ? byAmount.where({ payerId }) : byAmount;
+
+      const filtered =
+        categoryId !== undefined ? byPayer.where({ categoryId }) : byPayer;
 
       const rows = await filtered
         .include("participants", (p) => p.include("user"))
         .include("payer")
+        .include("category")
         .all();
 
       return rows.map((row) => ({
@@ -30,6 +34,8 @@ export class ExpensesService {
         payerId: row.payerId,
         payer: row.payer,
         participants: row.participants.map((p) => p.user),
+        categoryId: row.categoryId,
+        category: row.category,
       }));
     } catch (error) {
       console.error("Error getting expenses:", error);
@@ -44,6 +50,7 @@ export class ExpensesService {
         amount: newExpense.amount,
         date: Temporal.Instant.from(`${newExpense.date}T00:00:00Z`),
         payerId: newExpense.payerId,
+        categoryId: newExpense.categoryId,
         participants: (mutator) =>
           mutator.create(newExpense.participants.map((userId) => ({ userId }))),
       });
@@ -51,6 +58,7 @@ export class ExpensesService {
       const expense = await db.orm.public.Expense.where({ id: created.id })
         .include("participants", (p) => p.include("user"))
         .include("payer")
+        .include("category")
         .first();
 
       if (!expense) {
@@ -65,6 +73,8 @@ export class ExpensesService {
         payerId: expense.payerId,
         payer: expense.payer,
         participants: expense.participants.map((p) => p.user),
+        categoryId: expense.categoryId,
+        category: expense.category,
       };
     } catch (error) {
       console.error("Error adding expense:", error);

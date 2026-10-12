@@ -17,7 +17,7 @@ function errorMessage(error: unknown): string {
 }
 
 function useExpenses(filter: ExpenseFilter = {}): UseExpensesResult {
-  const { amount, payerId } = filter;
+  const { amount, payerId, categoryId } = filter;
   
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +33,8 @@ function useExpenses(filter: ExpenseFilter = {}): UseExpensesResult {
         params.set('amount', String(amount));
       }
       if (payerId !== undefined) params.set('payerId', String(payerId));
-
+      if (categoryId !== undefined) params.set('categoryId', String(categoryId));
+      
       const query = params.toString();
       const url = query
         ? `${API_BASE_URL}/expenses?${query}`
@@ -50,7 +51,7 @@ function useExpenses(filter: ExpenseFilter = {}): UseExpensesResult {
     } finally {
       setLoading(false);
     }
-  }, [amount, payerId]);
+  }, [amount, payerId, categoryId]);
 
   // Runs once on mount to load the initial expense list.
   useEffect(() => {
