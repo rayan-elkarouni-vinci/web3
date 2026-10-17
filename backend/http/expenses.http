@@ -36,3 +36,14 @@ GET {{expenses}}?categoryId=1&payerId=2
 
 ### Catégorie invalide (400)
 GET {{expenses}}?categoryId=abc
+
+            ### --- :id parameter ---
+
+### Get expense with id 1
+GET {{expenses}}/7
+
+### 2. Un id valide mais qui n'existe pas
+GET {{expenses}}/9999
+
+### 3. Un id qui n'est pas un nombre
+GET {{expenses}}/abc

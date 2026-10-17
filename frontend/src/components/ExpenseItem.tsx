@@ -2,6 +2,7 @@
  * A simple component to display an expense item
  */
 
+import { Link } from "react-router";
 import type { Expense } from "../types/Expense";
 
 interface ExpenseItemProps {
@@ -18,7 +19,7 @@ function ExpenseItem({ expense }: ExpenseItemProps) {
           timeZone: "UTC",
         })}
       </p>
-      <p>Description: {expense.description}</p>
+      <Link to={`/expenses/${expense.id}`}>Description: {expense.description}</Link>
       {/* amount must be restricted to 2 decimal places */}
       <p>Amount: {expense.amount.toFixed(2)}</p>
       <p>Payer: {expense.payer.name}</p>

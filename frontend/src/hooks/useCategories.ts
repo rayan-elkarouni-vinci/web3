@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Category } from '../types/Category';
-
-const host = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-const API_BASE_URL = `${host}/api`;
+import { apiRequest } from '../lib/rest';
 
 interface UseCategoriesResult {
   categories: Category[];
@@ -11,6 +9,10 @@ interface UseCategoriesResult {
 }
 
 function errorMessage(error: unknown): string {
+  if (error instanceof Response) {
+    return `Request failed (${error.status})`;
+  }
+
   return error instanceof Error ? error.message : 'Unknown error';
 }
 
@@ -24,11 +26,7 @@ function useCategories(): UseCategoriesResult {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`${API_BASE_URL}/categories`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch categories (${response.status})`);
-        }
-        setCategories((await response.json()) as Category[]);
+        setCategories(await apiRequest<Category[]>('/api/categories'));
       } catch (err) {
         setError(errorMessage(err));
       } finally {

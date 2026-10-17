@@ -1,19 +1,16 @@
-import { useState } from "react";
-
-import type { ExpenseFilter } from "../../types/Expense";
+import { useLoaderData } from "react-router";
 import ExpenseItem from "../../components/ExpenseItem";
 import ExpenseSearch from "../../components/ExpenseSearch";
-import useExpenses from "../../hooks/useExpenses";
+import type { Expense } from "../../types/Expense";
 
 const ExpenseList = () => {
-  const [filter, setFilter] = useState<ExpenseFilter>({});
-  const { expenses } = useExpenses(filter);
+  const expenses = useLoaderData() as Expense[];
 
   return (
     <>
       <h2>Your expenses</h2>
 
-      <ExpenseSearch onSearch={setFilter} />
+      <ExpenseSearch />
 
       <ul>
         {expenses.map((expense) => (

@@ -1,11 +1,7 @@
 import { useForm } from "react-hook-form";
-import type { ExpenseFilter } from "../types/Expense";
 import useUsers from "../hooks/useUsers";
 import useCategories from "../hooks/useCategories";
-
-interface ExpenseSearchProps {
-  onSearch: (filter: ExpenseFilter) => void;
-}
+import { useSearchParams } from "react-router";
 
 interface SearchForm {
   amount: string;
@@ -13,20 +9,28 @@ interface SearchForm {
   categoryId: string;
 }
 
-function ExpenseSearch({ onSearch }: ExpenseSearchProps) {
+function ExpenseSearch() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { users } = useUsers();
   const { categories } = useCategories();
 
   const { register, handleSubmit } = useForm<SearchForm>({
-    defaultValues: { amount: "", payerId: "", categoryId: "" },
+    // keep the form in sync with the URL when the page is opened with filters already set
+    defaultValues: {
+      amount: searchParams.get("amount") ?? "",
+      payerId: searchParams.get("payerId") ?? "",
+      categoryId: searchParams.get("categoryId") ?? "",
+    },
   });
 
   const onSubmit = (data: SearchForm) => {
-    onSearch({
-      amount: data.amount === "" ? undefined : Number(data.amount),
-      payerId: data.payerId === "" ? undefined : Number(data.payerId),
-      categoryId: data.categoryId === "" ? undefined : Number(data.categoryId),
-    });
+    // Only the filters the user actually filled in go into the URL.
+    const filter: Record<string, string> = {};
+    if (data.amount) filter.amount = data.amount;
+    if (data.payerId) filter.payerId = data.payerId;
+    if (data.categoryId) filter.categoryId = data.categoryId;
+
+    setSearchParams(filter);
   };
 
   return (
