@@ -9,7 +9,6 @@ interface UseExpensesResult {
   loading: boolean;
   error: string | null;
   addExpense: (expense: NewExpense) => Promise<void>;
-  resetExpenses: () => Promise<void>;
 }
 
 function errorMessage(error: unknown): string {
@@ -78,20 +77,7 @@ function useExpenses(filter: ExpenseFilter = {}): UseExpensesResult {
     [fetchExpenses],
   );
 
-  const resetExpenses = useCallback(async () => {
-    try {
-      setError(null);
-      const response = await fetch(`${API_BASE_URL}/expenses/reset`, { method: 'POST' });
-      if (!response.ok) {
-        throw new Error(`Failed to reset expenses (${response.status})`);
-      }
-      await fetchExpenses();
-    } catch (err) {
-      setError(errorMessage(err));
-    }
-  }, [fetchExpenses]);
-
-  return { expenses, loading, error, addExpense, resetExpenses };
+  return { expenses, loading, error, addExpense };
 }
 
 export default useExpenses;
