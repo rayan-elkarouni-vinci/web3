@@ -13,7 +13,16 @@ expensesRouter.get("/", async (req, res) => {
       return res.status(400).json({ error: "Invalid filter" });
     }
     const expenses = await ExpensesService.getExpenses(filter);
-    res.json(expenses);
+    res.json(
+      expenses.map((e) => ({
+        id: e.id,
+        description: e.description,
+        amount: e.amount,
+        date: e.date,
+        payer: { id: e.payer.id, name: e.payer.name },
+        category: e.category,
+      })),
+    );
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

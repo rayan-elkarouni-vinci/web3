@@ -27,3 +27,13 @@ export interface ExpenseFilter {
   payerId?: number;
   categoryId?: number;
 }
+
+// Ce que la page liste reçoit : seulement les champs affichés
+export interface ExpenseListItem {
+  id: number;
+  description: string;
+  amount: number;
+  date: string;
+  payer: { id: number; name: string };
+  category: Category | null;
+}

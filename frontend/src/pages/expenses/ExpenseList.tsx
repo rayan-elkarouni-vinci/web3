@@ -1,10 +1,10 @@
 import { useLoaderData } from "react-router";
 import ExpenseItem from "../../components/ExpenseItem";
 import ExpenseSearch from "../../components/ExpenseSearch";
-import type { Expense } from "../../types/Expense";
+import type { ExpenseListItem } from "../../types/Expense";
 
 const ExpenseList = () => {
-  const expenses = useLoaderData() as Expense[];
+  const expenses = useLoaderData() as ExpenseListItem[];
 
   return (
     <>

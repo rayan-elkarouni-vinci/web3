@@ -3,10 +3,10 @@
  */
 
 import { Link } from "react-router";
-import type { Expense } from "../types/Expense";
+import type { ExpenseListItem } from "../types/Expense";
 
 interface ExpenseItemProps {
-  expense: Expense;
+  expense: ExpenseListItem;
 }
 
 function ExpenseItem({ expense }: ExpenseItemProps) {
@@ -40,7 +40,6 @@ function ExpenseItem({ expense }: ExpenseItemProps) {
           "No category"
         )}
       </p>
-      <p>Participants: {expense.participants.map((p) => p.name).join(", ")}</p>
     </div>
   );
 }
