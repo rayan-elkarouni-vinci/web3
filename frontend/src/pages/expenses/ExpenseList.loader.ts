@@ -1,10 +1,38 @@
 import type { LoaderFunctionArgs } from "react-router";
 import type { ExpenseListItem } from "../../types/Expense";
-import { apiRequest } from "../../lib/rest";
+import { graphqlRequest } from '../../lib/graphql';
+
+const EXPENSES_QUERY = /* GraphQL */ `
+  query Expenses($filter: ExpenseFilter) {
+    expenses(filter: $filter) {
+      id
+      description
+      amount
+      date
+      payer {
+        id
+        name
+      }
+      category {
+        id
+        name
+        colour
+      }
+    }
+  }
+`;
 
 export async function expenseListLoader({
   request,
 }: LoaderFunctionArgs): Promise<ExpenseListItem[]> {
-  const query = new URL(request.url).searchParams.toString();
-  return apiRequest<ExpenseListItem[]>(`/api/expenses${query ? `?${query}` : ""}`);
+  const params = new URL(request.url).searchParams;
+
+  const filter = {
+    amount: params.get('amount') ? Number(params.get('amount')) : undefined,
+    payerId: params.get('payerId') ? Number(params.get('payerId')) : undefined,
+    categoryId: params.get('categoryId') ? Number(params.get('categoryId')) : undefined,
+  };
+
+  const data = await graphqlRequest<{ expenses: ExpenseListItem[] }>(EXPENSES_QUERY, { filter });
+  return data.expenses;
 }
