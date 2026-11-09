@@ -1,7 +1,9 @@
-import { createSchema } from 'graphql-yoga';
-import { ExpensesService } from '../services/expenses.service.ts';
-import { UsersService } from '../services/users.service.ts';
-import { CategoriesService } from '../services/categories.service.ts';
+import { createSchema } from "graphql-yoga";
+import { ExpensesService } from "../services/expenses.service.ts";
+import { UsersService } from "../services/users.service.ts";
+import { CategoriesService } from "../services/categories.service.ts";
+import { GraphQLError } from "graphql";
+import { isValidNewExpense } from "../guards/expenses.guard.ts";
 
 export const schema = createSchema({
   typeDefs: /* GraphQL */ `
@@ -40,13 +42,35 @@ export const schema = createSchema({
       users: [User!]!
       categories: [Category!]!
     }
+
+    input CreateExpenseInput {
+      description: String!
+      amount: Float!
+      date: String!
+      payerId: Int!
+      participants: [Int!]!
+      categoryId: Int!
+    }
+
+    type Mutation {
+      createExpense(input: CreateExpenseInput!): Expense!
+    }
   `,
   resolvers: {
     Query: {
-      expenses: (_parent, args) => ExpensesService.getExpenses(args.filter ?? {}),
+      expenses: (_parent, args) =>
+        ExpensesService.getExpenses(args.filter ?? {}),
       expense: (_parent, args) => ExpensesService.getExpenseById(args.id),
       users: () => UsersService.getUsers(),
       categories: () => CategoriesService.getCategories(),
+    },
+    Mutation: {
+      createExpense: (_parent, args) => {
+        if (!isValidNewExpense(args.input)) {
+          throw new GraphQLError("Invalid expense");
+        }
+        return ExpensesService.addExpense(args.input);
+      },
     },
   },
 });

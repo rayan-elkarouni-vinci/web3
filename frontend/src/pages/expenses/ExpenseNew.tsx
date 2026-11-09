@@ -1,15 +1,21 @@
 import { useNavigate } from "react-router";
 import ExpenseAdd from "../../components/ExpenseAdd";
 import type { NewExpense } from "../../types/Expense";
+import { graphqlRequest } from "../../lib/graphql";
+
+const CREATE_EXPENSE = /* GraphQL */ `
+  mutation CreateExpense($input: CreateExpenseInput!) {
+    createExpense(input: $input) {
+      id
+    }
+  }
+`;
 
 const ExpenseNew = () => {
   const navigate = useNavigate();
 
   const createExpense = async (expense: NewExpense) => {
-    // STUB : on ne parle pas encore au backend. L'Exercice 6 remplacera ce
-    // console.log par une mutation GraphQL.
-    console.log("Expense to create (not sent to the backend yet):", expense);
-
+    await graphqlRequest(CREATE_EXPENSE, { input: expense });
     navigate("/expenses");
   };
 
