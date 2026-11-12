@@ -1,4 +1,4 @@
-import type { NewExpense } from "../types/Expense";
+import type { NewExpenseFormOutput } from "../types/Expense";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,7 +6,6 @@ import useUsers from "../hooks/useUsers";
 import useCategories from "../hooks/useCategories";
 
 const ExpenseSchema = z.object({
-  payerId: z.number({ message: "Payer required" }),
   date: z.string().min(1, { message: "Date required" }),
   description: z
     .string()
@@ -24,7 +23,7 @@ const ExpenseSchema = z.object({
 type ExpenseForm = z.infer<typeof ExpenseSchema>;
 
 interface ExpenseAddProps {
-  addExpense: (expense: NewExpense) => void;
+  addExpense: (expense: NewExpenseFormOutput) => void;
 }
 
 function ExpenseAdd({ addExpense }: ExpenseAddProps) {
@@ -50,7 +49,6 @@ function ExpenseAdd({ addExpense }: ExpenseAddProps) {
       date: data.date,
       description: data.description ?? "",
       amount: data.amount,
-      payerId: data.payerId,
       participants: data.participants.map(Number),
       categoryId: data.categoryId,
     });
@@ -64,19 +62,6 @@ function ExpenseAdd({ addExpense }: ExpenseAddProps) {
     <div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <h2>Add a new Expense</h2>
-
-        <label>
-          Payer:
-          <select {...register("payerId", { valueAsNumber: true })}>
-            <option value="">Choose a payer</option>
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
-              </option>
-            ))}
-          </select>
-          {errors.payerId && <span>{errors.payerId.message}</span>}
-        </label>
 
         <label>
           Category:

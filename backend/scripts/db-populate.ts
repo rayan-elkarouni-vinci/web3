@@ -1,5 +1,8 @@
 import { db } from "../src/prisma/db.ts";
-import { Temporal } from 'temporal-polyfill';
+import { Temporal } from "temporal-polyfill";
+import bcrypt from "bcrypt";
+
+const DEMO_PASSWORD = "topsecret";
 
 const users = [
   {
@@ -31,20 +34,20 @@ const users = [
 const expensesSeed = [
   {
     description: "Coffee",
-    amount: 3.50,
+    amount: 3.5,
     payerId: 1, // John pays
     date: Temporal.Instant.from("2026-10-15T00:00:00Z"),
     participants: [1, 2],
   },
   {
-    description: 'Groceries',
+    description: "Groceries",
     amount: 45.0,
     date: Temporal.Instant.from("2026-10-16T00:00:00Z"),
     payerId: 2, // Jane pays
     participants: [1, 2, 3],
   },
   {
-    description: 'Internet Bill',
+    description: "Internet Bill",
     amount: 60.0,
     date: Temporal.Instant.from("2026-10-17T00:00:00Z"),
     payerId: 3, // Abdallah pays
@@ -91,10 +94,11 @@ async function seed() {
   console.log("...Done!");
 
   console.log("populating users...");
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
   await Promise.all(
     users.map(async (user) => {
-      await db.orm.public.User.create(user);
-    })
+      await db.orm.public.User.create({ ...user, passwordHash });
+    }),
   );
   console.log("...Done!");
 
@@ -106,7 +110,7 @@ async function seed() {
         participants: (mutator) =>
           mutator.create(participants.map((userId: number) => ({ userId }))),
       });
-    })
+    }),
   );
   console.log("...Done!");
 
@@ -114,10 +118,9 @@ async function seed() {
   await Promise.all(
     transfers.map(async (transfer) => {
       await db.orm.public.Transfer.create(transfer);
-    })
+    }),
   );
   console.log("...Done!");
-
 }
 
 seed()

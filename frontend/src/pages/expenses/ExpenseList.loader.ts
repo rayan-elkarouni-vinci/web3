@@ -1,22 +1,25 @@
-import type { LoaderFunctionArgs } from "react-router";
+import { redirect, type LoaderFunctionArgs } from "react-router";
 import type { ExpenseListItem } from "../../types/Expense";
-import { graphqlRequest } from '../../lib/graphql';
+import { graphqlRequest } from "../../lib/graphql";
+import { clearToken } from "../../lib/token";
 
-const EXPENSES_QUERY = /* GraphQL */ `
-  query Expenses($filter: ExpenseFilter) {
-    expenses(filter: $filter) {
-      id
-      description
-      amount
-      date
-      payer {
+const MY_EXPENSES_QUERY = /* GraphQL */ `
+  query MyExpenses($filter: ExpenseFilter) {
+    me {
+      expenses(filter: $filter) {
         id
-        name
-      }
-      category {
-        id
-        name
-        colour
+        description
+        amount
+        date
+        payer {
+          id
+          name
+        }
+        category {
+          id
+          name
+          colour
+        }
       }
     }
   }
@@ -28,11 +31,23 @@ export async function expenseListLoader({
   const params = new URL(request.url).searchParams;
 
   const filter = {
-    amount: params.get('amount') ? Number(params.get('amount')) : undefined,
-    payerId: params.get('payerId') ? Number(params.get('payerId')) : undefined,
-    categoryId: params.get('categoryId') ? Number(params.get('categoryId')) : undefined,
+    amount: params.get("amount") ? Number(params.get("amount")) : undefined,
+    payerId: params.get("payerId") ? Number(params.get("payerId")) : undefined,
+    categoryId: params.get("categoryId")
+      ? Number(params.get("categoryId"))
+      : undefined,
   };
 
-  const data = await graphqlRequest<{ expenses: ExpenseListItem[] }>(EXPENSES_QUERY, { filter });
-  return data.expenses;
+  const data = await graphqlRequest<{
+    me: { expenses: ExpenseListItem[] } | null;
+  }>(MY_EXPENSES_QUERY, { filter });
+
+  // `me` vaut null pour un appelant anonyme, et un jeton qui ne se vérifie
+  // plus rend l'appelant anonyme aux yeux du serveur.
+  if (!data.me) {
+    clearToken();
+    throw redirect("/login");
+  }
+
+  return data.me.expenses;
 }

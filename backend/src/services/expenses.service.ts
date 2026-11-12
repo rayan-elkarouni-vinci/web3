@@ -3,7 +3,6 @@ import { db } from "../prisma/db.ts";
 import { Temporal } from "temporal-polyfill";
 
 export class ExpensesService {
-  
   public static async getExpenses(
     filter: ExpenseFilter = {},
   ): Promise<Expense[]> {
@@ -45,33 +44,33 @@ export class ExpensesService {
   }
 
   public static async getExpenseById(id: number): Promise<Expense | undefined> {
-  try {
-    const row = await db.orm.public.Expense.where({ id })
-      .include("participants", (p) => p.include("user"))
-      .include("payer")
-      .include("category")
-      .first();
+    try {
+      const row = await db.orm.public.Expense.where({ id })
+        .include("participants", (p) => p.include("user"))
+        .include("payer")
+        .include("category")
+        .first();
 
-    if (!row) {
-      return undefined;
+      if (!row) {
+        return undefined;
+      }
+
+      return {
+        id: row.id,
+        date: row.date.toString(),
+        amount: row.amount,
+        description: row.description,
+        payerId: row.payerId,
+        payer: row.payer,
+        participants: row.participants.map((p) => p.user),
+        categoryId: row.categoryId,
+        category: row.category,
+      };
+    } catch (error) {
+      console.error("Error getting expense by id:", error);
+      throw error;
     }
-
-    return {
-      id: row.id,
-      date: row.date.toString(),
-      amount: row.amount,
-      description: row.description,
-      payerId: row.payerId,
-      payer: row.payer,
-      participants: row.participants.map((p) => p.user),
-      categoryId: row.categoryId,
-      category: row.category,
-    };
-  } catch (error) {
-    console.error("Error getting expense by id:", error);
-    throw error;
   }
-}
 
   public static async addExpense(newExpense: NewExpense): Promise<Expense> {
     try {
@@ -110,6 +109,18 @@ export class ExpensesService {
       console.error("Error adding expense:", error);
       throw error;
     }
+  }
+
+  public static async getExpensesOfUser(
+    userId: number,
+    filter: ExpenseFilter = {},
+  ): Promise<Expense[]> {
+    const all = await ExpensesService.getExpenses(filter);
+    return all.filter(
+      (expense) =>
+        expense.payerId === userId ||
+        expense.participants.some((participant) => participant.id === userId),
+    );
   }
 
   /*

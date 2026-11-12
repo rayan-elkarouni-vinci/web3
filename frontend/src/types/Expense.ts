@@ -37,3 +37,6 @@ export interface ExpenseListItem {
   payer: { id: number; name: string };
   category: Category | null;
 }
+
+// Ce que le formulaire produit : une nouvelle dépense, sans le payeur
+export type NewExpenseFormOutput = Omit<NewExpense, 'payerId'>;

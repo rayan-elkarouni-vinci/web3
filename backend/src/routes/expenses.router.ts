@@ -28,6 +28,7 @@ expensesRouter.get("/", async (req, res) => {
   }
 });
 
+/*
 expensesRouter.post("/",  async (req, res) => {
   try {
     const expenseInput: NewExpense = req.body;
@@ -40,6 +41,7 @@ expensesRouter.post("/",  async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+*/
 
 /*
 expensesRouter.post("/reset", (req, res) => {
